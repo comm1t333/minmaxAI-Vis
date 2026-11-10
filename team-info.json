@@ -2,11 +2,11 @@
     "team_name": "Team Name",
     "students": [
         {
-            "student_id": "k00000000",
-            "first_name": "First",
-            "last_name": "Last",
-            "email": "first.last@mail.com",
-            "github_user": "mygitusername"
+            "student_id": "k12542764",
+            "first_name": "Tobias Steven",
+            "last_name": "Böcker",
+            "email": "k12542764@students.jku.at",
+            "github_user": "tobias-bkr"
         },
         // ...add a record for each student
     ]
