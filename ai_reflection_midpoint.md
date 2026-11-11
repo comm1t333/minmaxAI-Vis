@@ -25,7 +25,7 @@ What I struggled the most was to get my Horizon output data into a data format t
 outputs of my model in a stupid data structure to begin with. That was because I didn't think about visualization.
 (read more about the visualization in: How the visualization was created and harmonized with data the data structure.txt)  
 
-###Overall insight: 
+### Overall insight: 
 
 It certainly would have helped me to be more sophisticated in visualization- and html-stuff, because then i could have written the prompts more clearly and
 effectively. Because the better I know a topic the better I can provide clear instructions. In general, I got much unnecessary output from GEMINI, because 
