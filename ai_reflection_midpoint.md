@@ -1,8 +1,10 @@
-AI-aided pair
+AI-aided pair:
+Md Janib Rijbi, k12249462
+Markus Ennsberger-Kranabiter, k01455904
 
-
+            
 Reflection on my AI-usage:
-Author: Markus Ennsberger-Kranabiter
+(by markus)
 
 I was very satisfied with the custom-generated input data created by GEMINI. Nevertheless, I hadn't a clear plan in the beginning, what I want to visualize and how. 
 This resulted in a clumsy data structure and actually in too much unnecessary input data. That caused a waste in computing power. 
