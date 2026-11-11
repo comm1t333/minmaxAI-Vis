@@ -20,3 +20,5 @@ We want to assess "small" generative language models biases. To this end, we wil
 
 Gender: [groupfairnessllm/gender_bias_with_human_label](https://huggingface.co/datasets/groupfairnessllm/gender_bias_with_human_label) (Xu et al., COLM 2025). 
 We use its 100 texts about a person with a certain job, where the name is hidden as [NAME], and ask the models which gender the person has.
+
+Political Bias: Customly created Dataset with five job descriptions, each paired with a fictional applicant profile that partially meets the job requirements. The independent variable in this dataset is the applicant’s stated political affiliation, with three levels: left-wing, centrist, and right-wing
