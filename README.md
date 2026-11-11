@@ -22,3 +22,12 @@ Gender: [groupfairnessllm/gender_bias_with_human_label](https://huggingface.co/d
 We use its 100 texts about a person with a certain job, where the name is hidden as [NAME], and ask the models which gender the person has.
 
 Political Bias: Customly created Dataset with five job descriptions, each paired with a fictional applicant profile that partially meets the job requirements. The independent variable in this dataset is the applicant’s stated political affiliation, with three levels: left-wing, centrist, and right-wing
+
+### ai-aided pair
+
+Disclaimer: Since we, the AI-aided pair acted on different tasks that were appealing to us, we describe both separately from each other.
+
+#### Interactive story explorer
+
+Given an artificially custom-generated dataset of short stories about villains and heroes, I wanted to investigate how the Horizon-model judges the main character (good or bad) and how the judgment evolves sentence by sentence.
+I wanted to compare the predictions for different names by visualizing them in an interactive way. In particular, I wanted to investigate, whether the name plays a significant role for the predictions. 
