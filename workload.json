@@ -15,6 +15,11 @@
             "first_name": "Markus",
             "last_name": "Ennsberger-Kranabiter",
             "workload": 0.25
+        },
+        {
+            "first_name": "Md Janib",
+            "last_name": "Rijbi",
+            "workload": 0.25
         }
     ]
-} 
+}
