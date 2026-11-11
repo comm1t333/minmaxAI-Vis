@@ -23,7 +23,7 @@ We use its 100 texts about a person with a certain job, where the name is hidden
 
 Political Bias: Customly created Dataset with five job descriptions, each paired with a fictional applicant profile that partially meets the job requirements. The independent variable in this dataset is the applicant’s stated political affiliation, with three levels: left-wing, centrist, and right-wing
 
-### ai-aided pair
+### Ai-aided pair
 
 Disclaimer: Since we, the AI-aided pair acted on different tasks that were appealing to us, we describe both separately from each other.
 
