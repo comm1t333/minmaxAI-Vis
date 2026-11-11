@@ -34,7 +34,25 @@ To build something effectively (with AI), it certainly helps to be knowledgeable
 
 Also for a small task like this one it is advantageous to have a smart "architecture" that smartly shatters the task into many small ones. GEMINI can handle 
 those small ones pretty well. But to design a smart architecture it is again necessary to have knowledge about the problem and also know the corresponding 
-technical terms. Only then we can give useful prompts and use GenAi effectively. So finally, LLMs aren't an excuse to avoid becoming knowledgeable about p
-rogramming—or anything else.
+technical terms. Only then we can give useful prompts and use GenAi effectively. So finally, LLMs aren't an excuse to avoid becoming knowledgeable about 
+programming—or anything else.
 
 
+
+## Reflection on my AI-usage:  
+(by md janib)
+
+For my part (political opinions) I used Claude to set up the experiment in Google Colab and to create the plots. I was very satisfied with how fast I got a working notebook. 
+Especially the attention visualization would have taken me much longer without AI.
+
+Nevertheless, the generated code did not work perfectly from the beginning. I had to run it myself, check the results and give feedback, so it took several prompts 
+until everything worked. Some problems were only setup issues, like the Hugging Face token or the access to the Gemma model. 
+A more important problem was with K2-Horizon: the answers were first read wrong from the model output. I only noticed this because I looked at the raw answers of the model. 
+After fixing it, the results made much more sense. This showed me that I can't just trust the final plots.
+Like Markus, I also think it is a disadvantage when you don't fully understand "your" code. If something goes wrong, you depend on the AI again to fix it.
+(read more about my AI interactions in: ai-interactions/md_janib_rijbi_claude.md)
+
+### Overall insight: 
+
+GenAI is very helpful to build something quickly, but you still have to check the results yourself. The better I understood the task, the clearer my prompts 
+became and the better the answers were. So I agree with Markus: AI is a great tool, but it is not an excuse to avoid learning the topic yourself.
