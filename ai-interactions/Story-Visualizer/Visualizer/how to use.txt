@@ -1,3 +1,6 @@
 Disclaimer: Visualizing tool was solely made by feeding GEMINI several prompts which are shown in the file: Interactive Dataset Exploration App + adequate data parsing - Conversation with GEMINI.pdf
 
-If you don't load a dataset (button in left corner) the tool uses a mock data set integrated in the applications. Two datasets are in the same directory that can be used. Using the small_data should deliver better results, because the proportion of acceptable answers should be higher.
+Download final.html with datasets big_data.json and small_data.json.
+If you don't load them (button in left corner) the tool uses a mock data set integrated in the applications.
+Two datasets are in the same directory that can be used. Using the small_data should deliver better results, 
+because the proportion of acceptable answers should be higher.
