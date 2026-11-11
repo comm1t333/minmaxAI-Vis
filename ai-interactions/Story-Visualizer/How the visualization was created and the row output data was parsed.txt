@@ -1,0 +1,8 @@
+The file "Interactive Dataset Exploration App + adequate data parsing - Conversation with GEMINI.pdf" shows the whole interactions with Google Gemini how the html Visualization was done and how the model output data was brought into the correct format so that the visualization could work with it.
+
+Disclaimer: I have no idea about html or java script. The visualization was solely done by GEMINI guided by my prompts. And what I understand is that Gemini used the webtool Canva to create the visualization.
+
+Summary: 
+Generating the visualization tool was done by several prompts in which GEMINI gradually altered the tool so that it'd fit my imagination. This was easy. It took more effort to bring my (admittedly messy) output data into a format that was usable. The notebook parse_data_for_visualization.ipynb shows those step, given my initial raw output files.
+
+The model's raw outputs and a jupyter notebook which shows how the data was parsed are included in the folder 'raw_results_and_parsing_data'

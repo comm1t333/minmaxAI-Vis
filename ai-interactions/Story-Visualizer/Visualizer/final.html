@@ -1,0 +1,663 @@
+<!DOCTYPE html><html lang="en" class="h-full"><head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dataset Narrative Explorer v2</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- FontAwesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: #1e293b; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #475569; border-radius: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #64748b; }
+    </style></head><body class="bg-slate-900 text-slate-100 h-full flex flex-col overflow-hidden">
+
+    <!-- Header Bar -->
+    <header class="bg-slate-800 border-b border-slate-700 px-6 py-3 flex items-center justify-between shadow-md z-10 flex-shrink-0">
+        <div class="flex items-center space-x-3">
+            <div class="bg-indigo-600 text-white p-2.5 rounded-xl shadow-lg flex items-center justify-center w-10 h-10">
+                <i class="fa-solid fa-chart-line text-lg"></i>
+            </div>
+            <div>
+                <h1 class="text-lg font-bold text-white tracking-tight">Narrative Line Explorer</h1>
+                <p class="text-xs text-slate-400">Step-by-step track visualizer for character story progression</p>
+            </div>
+        </div>
+        <div class="flex items-center space-x-3">
+            <span id="data-count-badge" class="bg-slate-700 text-indigo-300 text-xs px-3 py-1.5 rounded-lg border border-slate-600 font-mono">Loading Data...</span>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <div class="flex-1 flex overflow-hidden">
+        
+        <!-- Sidebar Controls -->
+        <aside class="w-80 bg-slate-800 border-r border-slate-700 p-5 flex flex-col justify-between overflow-y-auto custom-scrollbar flex-shrink-0">
+            <div class="space-y-6">
+                
+                <!-- File Upload Section -->
+                <div class="bg-slate-900/80 p-3.5 rounded-xl border border-indigo-500/30 space-y-2">
+                    <label class="block text-xs font-bold uppercase tracking-wider text-indigo-400">
+                        <i class="fa-solid fa-file-arrow-up mr-1"></i> Load Dataset JSON
+                    </label>
+                    <input type="file" id="json-file-input" accept=".json" onchange="handleFileSelect(event)" 
+                           class="w-full text-xs text-slate-400 file:mr-2 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-indigo-600 file:text-white hover:file:bg-indigo-500 cursor-pointer">
+                    <p class="text-[10px] text-slate-400">Upload formatted dataset JSON to view custom data.</p>
+                </div>
+
+                <!-- 1. Select Story Function -->
+                <div>
+                    <label class="block text-xs font-bold uppercase tracking-wider text-indigo-400 mb-2">
+                        <i class="fa-solid fa-filter mr-1"></i> Story Function
+                    </label>
+                    <select id="select-function" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2.5 text-sm text-white focus:outline-none focus:border-indigo-500 shadow-inner" onchange="onFunctionChange()">
+                        <!-- Populated dynamically -->
+                    </select>
+                </div>
+
+                <!-- 2. Select Character Names & Language Filter -->
+                <div>
+                    <div class="flex items-center justify-between mb-2">
+                        <label class="text-xs font-bold uppercase tracking-wider text-indigo-400">
+                            <i class="fa-solid fa-users mr-1"></i> Characters
+                        </label>
+                        <div class="space-x-1">
+                            <button onclick="selectAllNames(true)" class="text-[11px] bg-slate-700 hover:bg-slate-600 text-slate-200 px-2.5 py-0.5 rounded transition">All</button>
+                            <button onclick="clearAllNames()" class="text-[11px] bg-rose-900/60 hover:bg-rose-800 text-rose-200 border border-rose-700/50 px-2.5 py-0.5 rounded transition font-medium">Clear All</button>
+                        </div>
+                    </div>
+
+                    <!-- Language Filter Dropdown -->
+                    <div class="mb-2">
+                        <select id="select-language-filter" onchange="filterNameList()" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-1.5 text-xs text-slate-300 focus:outline-none focus:border-indigo-500">
+                            <option value="">🌐 All Languages</option>
+                        </select>
+                    </div>
+                    
+                    <!-- Search inside sidebar -->
+                    <input type="text" id="name-search" placeholder="Filter names..." oninput="filterNameList()" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-1.5 text-xs text-white mb-2 focus:outline-none focus:border-indigo-500">
+
+                    <!-- Checkboxes Container -->
+                    <div id="checkboxes-container" class="space-y-1.5 max-h-48 overflow-y-auto custom-scrollbar p-1 bg-slate-900/60 rounded-xl border border-slate-700/60">
+                        <!-- Populated via JS -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tip Card -->
+            <div class="bg-indigo-950/40 border border-indigo-500/30 rounded-xl p-3 text-xs text-indigo-200 space-y-1 mt-4">
+                <div class="font-semibold flex items-center space-x-1.5 text-indigo-400">
+                    <i class="fa-solid fa-circle-info"></i>
+                    <span>Line Diagram Guide</span>
+                </div>
+                <p class="text-[11px] leading-relaxed text-slate-400">
+                    Hover over any dot to inspect predictions. Only selected character tracks are shown with generous vertical spacing.
+                </p>
+            </div>
+        </aside>
+
+        <!-- Main Chart & Content Display -->
+        <main class="flex-1 flex flex-col p-6 space-y-6 overflow-y-auto custom-scrollbar bg-slate-900">
+            
+            <!-- Visualizer Card (Line Diagram) -->
+            <div class="bg-slate-800 border border-slate-700 rounded-2xl p-5 shadow-lg flex flex-col">
+                <div class="flex items-center justify-between mb-4">
+                    <div>
+                        <h2 class="text-base font-bold text-white flex items-center space-x-2">
+                            <i class="fa-solid fa-diagram-project text-indigo-400"></i>
+                            <span>Character Progression Line Diagram</span>
+                        </h2>
+                        <p class="text-xs text-slate-400">Horizontal: Step Number (1-9) &nbsp;|&nbsp; Vertical: Character Tracks</p>
+                    </div>
+                    <div id="chart-status-badge" class="text-xs font-semibold px-3 py-1 bg-indigo-900/50 text-indigo-300 border border-indigo-700/50 rounded-lg">
+                        0 Tracks Visualized
+                    </div>
+                </div>
+
+                <!-- Canvas Area with large spacious height -->
+                <div class="relative w-full min-h-[380px] max-h-[550px] flex-1">
+                    <canvas id="lineDiagramCanvas"></canvas>
+                </div>
+            </div>
+
+            <!-- Detail Inspection Card -->
+            <div class="bg-slate-800 border border-slate-700 rounded-2xl p-6 shadow-lg flex flex-col space-y-4">
+                <!-- Header Info -->
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center border-b border-slate-700 pb-4 gap-3">
+                    <div>
+                        <div class="flex items-center space-x-2 mb-1">
+                            <span id="detail-badge-func" class="bg-indigo-950 text-indigo-300 border border-indigo-700/50 text-[10px] font-mono px-2 py-0.5 rounded uppercase font-bold">-</span>
+                            <span id="detail-badge-index" class="bg-slate-700 text-slate-300 text-[10px] font-mono px-2 py-0.5 rounded">Index #-</span>
+                        </div>
+                        <h3 id="detail-character-name" class="text-2xl font-bold text-white">Select a Node on the Chart</h3>
+                    </div>
+
+                    <!-- Meta Tags -->
+                    <div class="flex flex-wrap gap-2 text-xs">
+                        <div class="bg-slate-900/80 border border-slate-700 px-3 py-1.5 rounded-xl">
+                            <span class="text-slate-400 block text-[9px] uppercase font-bold">Language</span>
+                            <span id="meta-language" class="font-semibold text-slate-200">-</span>
+                        </div>
+                        <div class="bg-slate-900/80 border border-slate-700 px-3 py-1.5 rounded-xl">
+                            <span class="text-slate-400 block text-[9px] uppercase font-bold">Gender</span>
+                            <span id="meta-gender" class="font-semibold text-slate-200">-</span>
+                        </div>
+                        <div class="bg-slate-900/80 border border-slate-700 px-3 py-1.5 rounded-xl">
+                            <span class="text-slate-400 block text-[9px] uppercase font-bold">Goodness</span>
+                            <span id="meta-goodness" class="font-semibold text-slate-200">-</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step Bar Controls -->
+                <div class="flex items-center justify-between bg-slate-900/60 p-3 rounded-xl border border-slate-700/60">
+                    <div class="flex items-center space-x-3">
+                        <span class="text-xs font-bold uppercase text-slate-400">Step:</span>
+                        <span id="detail-step-badge" class="bg-indigo-600 text-white text-xs font-bold px-3 py-1 rounded-lg">Step 1 of 9</span>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <button onclick="changeStep(-1)" class="bg-slate-700 hover:bg-slate-600 text-white p-2 rounded-lg text-xs transition">
+                            <i class="fa-solid fa-chevron-left"></i>
+                        </button>
+                        <input type="range" id="step-slider" min="1" max="9" value="1" step="1" oninput="onStepSlider(this.value)" class="w-32 sm:w-48 accent-indigo-500 cursor-pointer h-1.5 bg-slate-700 rounded-lg">
+                        <button onclick="changeStep(1)" class="bg-slate-700 hover:bg-slate-600 text-white p-2 rounded-lg text-xs transition">
+                            <i class="fa-solid fa-chevron-right"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Step Content Grid -->
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 pt-2">
+                    <!-- Narrative Snapshot -->
+                    <div class="lg:col-span-2 bg-slate-900/50 border border-slate-700/60 rounded-xl p-4 flex flex-col">
+                        <h4 class="text-xs font-bold uppercase text-indigo-400 mb-2 flex items-center space-x-1.5">
+                            <i class="fa-solid fa-book-open"></i>
+                            <span>Story Snapshot (Step <span id="snapshot-step-num">1</span>)</span>
+                        </h4>
+                        <div id="narrative-snapshot-text" class="text-slate-300 text-sm leading-relaxed font-serif italic bg-slate-900 p-4 rounded-lg border border-slate-800 flex-1 min-h-[140px] overflow-y-auto max-h-[220px] custom-scrollbar">
+                            Please select a character node from the chart above or checkboxes on the left.
+                        </div>
+                    </div>
+
+                    <!-- Extracted Attributes Q&A -->
+                    <div class="bg-slate-900/50 border border-slate-700/60 rounded-xl p-4 flex flex-col">
+                        <h4 class="text-xs font-bold uppercase text-indigo-400 mb-2 flex items-center space-x-1.5">
+                            <i class="fa-solid fa-circle-question"></i>
+                            <span>Extracted Predictions</span>
+                        </h4>
+                        <div id="qa-attributes-list" class="space-y-2 overflow-y-auto max-h-[220px] custom-scrollbar pr-1 flex-1">
+                            <div class="text-xs text-slate-500 italic p-2">Select a character to view extracted predictions.</div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+        </main>
+
+    </div>
+
+    <!-- JavaScript Data & Logic -->
+    <script>
+        const DISTINCT_COLORS = [
+            '#6366f1', '#ec4899', '#10b981', '#f59e0b', '#3b82f6', 
+            '#8b5cf6', '#14b8a6', '#f97316', '#06b6d4', '#e11d48',
+            '#84cc16', '#a855f7', '#0284c7', '#d97706', '#10b981', '#f43f5e'
+        ];
+
+        let fullDataset = [];
+        let selectedFunction = '';
+        let selectedCharacterIndices = [];
+        let activeCharacterIndex = null;
+        let activeStepNumber = 1;
+        let chartInstance = null;
+
+        document.addEventListener('DOMContentLoaded', () => {
+            loadDefaultMockDataset();
+        });
+
+        function handleFileSelect(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const parsedData = JSON.parse(e.target.result);
+                    if (Array.isArray(parsedData) && parsedData.length > 0) {
+                        fullDataset = parsedData;
+                        document.getElementById('data-count-badge').textContent = `${fullDataset.length} Stories Loaded`;
+                        populateFunctionDropdown();
+                        onFunctionChange();
+                    } else {
+                        alert('JSON file must contain an array of story entry objects.');
+                    }
+                } catch (err) {
+                    alert('Invalid JSON file. Please make sure the file format is valid.');
+                    console.error(err);
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        function populateFunctionDropdown() {
+            const selectEl = document.getElementById('select-function');
+            const functions = [...new Set(fullDataset.map(d => d.story_function))];
+            
+            selectEl.innerHTML = functions.map(func => {
+                const count = fullDataset.filter(d => d.story_function === func).length;
+                return `<option value="${func}">${func} (${count} entries)</option>`;
+            }).join('');
+
+            selectedFunction = functions[0] || '';
+        }
+
+        function onFunctionChange() {
+            selectedFunction = document.getElementById('select-function').value;
+            const filtered = fullDataset.filter(d => d.story_function === selectedFunction);
+            
+            populateLanguageFilter(filtered);
+
+            // Select first 3 characters by default
+            selectedCharacterIndices = filtered.slice(0, 3).map(d => d.dataset_index);
+            activeCharacterIndex = selectedCharacterIndices[0] !== undefined ? selectedCharacterIndices[0] : null;
+            activeStepNumber = 1;
+
+            document.getElementById('name-search').value = '';
+            document.getElementById('select-language-filter').value = '';
+            populateCheckboxes(filtered);
+            updateView();
+        }
+
+        function populateLanguageFilter(filteredData) {
+            const langSelect = document.getElementById('select-language-filter');
+            const languages = [...new Set(filteredData.map(d => d.true_language).filter(Boolean))].sort();
+            
+            langSelect.innerHTML = `<option value="">🌐 All Languages (${languages.length})</option>` + 
+                languages.map(lang => `<option value="${lang}">${lang}</option>`).join('');
+        }
+
+        function populateCheckboxes(filteredData) {
+            const container = document.getElementById('checkboxes-container');
+            const searchVal = document.getElementById('name-search').value.toLowerCase();
+            const langVal = document.getElementById('select-language-filter').value;
+            
+            container.innerHTML = filteredData.map((item, idx) => {
+                const matchesSearch = item.character_name.toLowerCase().includes(searchVal);
+                const matchesLang = !langVal || item.true_language === langVal;
+                const isVisible = matchesSearch && matchesLang;
+
+                const isChecked = selectedCharacterIndices.includes(item.dataset_index);
+                const color = DISTINCT_COLORS[idx % DISTINCT_COLORS.length];
+                
+                return `
+                    <label class="flex items-center space-x-2 p-1.5 hover:bg-slate-800 rounded-lg cursor-pointer text-xs transition character-label" 
+                           style="display: ${isVisible ? 'flex' : 'none'};" data-name="${item.character_name.toLowerCase()}" data-lang="${item.true_language || ''}">
+                        <input type="checkbox" value="${item.dataset_index}" ${isChecked ? 'checked' : ''} 
+                               onchange="toggleCharacterSelection(${item.dataset_index})" 
+                               class="accent-indigo-500 rounded border-slate-700">
+                        <span class="w-2.5 h-2.5 rounded-full flex-shrink-0" style="background-color: ${color}"></span>
+                        <span class="text-slate-200 truncate flex-1">${item.character_name}</span>
+                        <span class="text-[9px] text-slate-500 font-mono">${item.true_language || ''}</span>
+                    </label>
+                `;
+            }).join('');
+        }
+
+        function filterNameList() {
+            const searchVal = document.getElementById('name-search').value.toLowerCase();
+            const langVal = document.getElementById('select-language-filter').value;
+            const labels = document.querySelectorAll('#checkboxes-container .character-label');
+            
+            labels.forEach(label => {
+                const name = label.getAttribute('data-name');
+                const lang = label.getAttribute('data-lang');
+                const matchesSearch = name.includes(searchVal);
+                const matchesLang = !langVal || lang === langVal;
+
+                label.style.display = (matchesSearch && matchesLang) ? 'flex' : 'none';
+            });
+        }
+
+        function toggleCharacterSelection(datasetIndex) {
+            const idx = selectedCharacterIndices.indexOf(datasetIndex);
+            if (idx > -1) {
+                selectedCharacterIndices.splice(idx, 1);
+            } else {
+                selectedCharacterIndices.push(datasetIndex);
+                activeCharacterIndex = datasetIndex;
+            }
+
+            if (!selectedCharacterIndices.includes(activeCharacterIndex)) {
+                activeCharacterIndex = selectedCharacterIndices[0] !== undefined ? selectedCharacterIndices[0] : null;
+            }
+
+            updateView();
+        }
+
+        function selectAllNames(select) {
+            const filtered = fullDataset.filter(d => d.story_function === selectedFunction);
+            const langVal = document.getElementById('select-language-filter').value;
+            const searchVal = document.getElementById('name-search').value.toLowerCase();
+
+            if (select) {
+                filtered.forEach(d => {
+                    const matchesSearch = d.character_name.toLowerCase().includes(searchVal);
+                    const matchesLang = !langVal || d.true_language === langVal;
+                    if (matchesSearch && matchesLang && !selectedCharacterIndices.includes(d.dataset_index)) {
+                        selectedCharacterIndices.push(d.dataset_index);
+                    }
+                });
+            } else {
+                selectedCharacterIndices = [];
+            }
+            activeCharacterIndex = selectedCharacterIndices[0] !== undefined ? selectedCharacterIndices[0] : null;
+
+            const checkboxes = document.querySelectorAll('#checkboxes-container input[type="checkbox"]');
+            checkboxes.forEach(cb => {
+                const val = parseInt(cb.value);
+                cb.checked = selectedCharacterIndices.includes(val);
+            });
+
+            updateView();
+        }
+
+        function clearAllNames() {
+            selectedCharacterIndices = [];
+            activeCharacterIndex = null;
+
+            const checkboxes = document.querySelectorAll('#checkboxes-container input[type="checkbox"]');
+            checkboxes.forEach(cb => cb.checked = false);
+
+            updateView();
+        }
+
+        function updateView() {
+            renderLineDiagram();
+            renderDetailCard();
+        }
+
+        function shortenAttributeKey(fullKey) {
+            const lower = fullKey.toLowerCase();
+            if (lower.includes('gender')) return 'Gender';
+            if (lower.includes('profession')) return 'Profession';
+            if (lower.includes('nationality') || lower.includes('background')) return 'Nationality';
+            if (lower.includes('belief') || lower.includes('religion')) return 'Belief/Religion';
+            if (lower.includes('good') || lower.includes('moral')) return 'Goodness';
+            return fullKey;
+        }
+
+        function renderLineDiagram() {
+            const ctx = document.getElementById('lineDiagramCanvas').getContext('2d');
+            const allFuncData = fullDataset.filter(d => d.story_function === selectedFunction);
+            document.getElementById('chart-status-badge').textContent = `${selectedCharacterIndices.length} Tracks Visualized`;
+
+            if (chartInstance) chartInstance.destroy();
+            if (allFuncData.length === 0) return;
+
+            // Filter datasets to ONLY include currently selected character indices
+            const selectedData = allFuncData.filter(d => selectedCharacterIndices.includes(d.dataset_index));
+
+            const yLabelsMap = {};
+            const datasets = selectedData.map((item, laneIdx) => {
+                // Find original color index in allFuncData for stable coloring
+                const originalIdx = allFuncData.findIndex(d => d.dataset_index === item.dataset_index);
+                const color = DISTINCT_COLORS[originalIdx % DISTINCT_COLORS.length];
+                const isActive = item.dataset_index === activeCharacterIndex;
+
+                yLabelsMap[laneIdx * 2.0] = item.character_name;
+
+                const stepNumbers = item.steps ? item.steps.map(s => s.step_number) : [1,2,3,4,5,6,7,8,9];
+
+                return {
+                    label: item.character_name,
+                    data: stepNumbers.map(step => {
+                        const stepData = item.steps ? item.steps.find(s => s.step_number === step) : null;
+                        return {
+                            x: step,
+                            y: laneIdx * 2.0, // Wide vertical multiplier (spacing of 2.0)
+                            datasetIndex: item.dataset_index,
+                            stepNumber: step,
+                            characterName: item.character_name,
+                            snapshot: stepData ? stepData.story_snapshot : 'No snapshot',
+                            attributes: stepData ? stepData.extracted_attributes : {}
+                        };
+                    }),
+                    borderColor: isActive ? color : color + 'dd',
+                    backgroundColor: color,
+                    borderWidth: isActive ? 4 : 2.5,
+                    pointBackgroundColor: isActive ? '#ffffff' : color,
+                    pointBorderColor: color,
+                    pointBorderWidth: 2,
+                    pointRadius: (ctx) => {
+                        const raw = ctx.raw;
+                        if (raw && raw.datasetIndex === activeCharacterIndex && raw.stepNumber === activeStepNumber) {
+                            return 10;
+                        }
+                        return 6;
+                    },
+                    pointHoverRadius: 9,
+                    showLine: true,
+                    tension: 0
+                };
+            });
+
+            chartInstance = new Chart(ctx, {
+                type: 'line',
+                data: { datasets: datasets },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    onClick: (event, elements) => {
+                        if (elements.length > 0) {
+                            const first = elements[0];
+                            const datasetObj = chartInstance.data.datasets[first.datasetIndex];
+                            const pointData = datasetObj.data[first.index];
+                            
+                            activeCharacterIndex = pointData.datasetIndex;
+                            activeStepNumber = pointData.stepNumber;
+                            
+                            updateView();
+                        }
+                    },
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            enabled: true,
+                            backgroundColor: 'rgba(15, 23, 42, 0.95)',
+                            titleColor: '#818cf8',
+                            bodyColor: '#e2e8f0',
+                            borderColor: '#334155',
+                            borderWidth: 1,
+                            padding: 12,
+                            boxPadding: 6,
+                            usePointStyle: true,
+                            callbacks: {
+                                title: (items) => {
+                                    const raw = items[0].raw;
+                                    return `${raw.characterName} (Step ${raw.x})`;
+                                },
+                                label: (item) => {
+                                    const raw = item.raw;
+                                    let lines = [];
+                                    const attrs = raw.attributes;
+                                    for (let key in attrs) {
+                                        const shortName = shortenAttributeKey(key);
+                                        lines.push(`${shortName}: ${attrs[key]}`);
+                                    }
+                                    return lines;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            type: 'linear',
+                            min: 0.5,
+                            max: 9.5,
+                            ticks: {
+                                stepSize: 1,
+                                color: '#94a3b8',
+                                callback: (val) => val >= 1 && val <= 9 ? `Step ${val}` : ''
+                            },
+                            grid: { color: 'rgba(255,255,255,0.05)' }
+                        },
+                        y: {
+                            type: 'linear',
+                            min: -1.0,
+                            max: selectedData.length > 0 ? (selectedData.length - 1) * 2.0 + 1.0 : 1.0,
+                            ticks: {
+                                stepSize: 2.0,
+                                color: '#e2e8f0',
+                                font: { weight: 'bold', size: 11 },
+                                callback: (val) => yLabelsMap[val] || ''
+                            },
+                            grid: { color: 'rgba(255,255,255,0.05)' }
+                        }
+                    }
+                }
+            });
+        }
+
+        function renderDetailCard() {
+            const character = fullDataset.find(d => d.dataset_index === activeCharacterIndex);
+
+            if (!character) {
+                document.getElementById('detail-character-name').textContent = "No Character Selected";
+                document.getElementById('detail-badge-func').textContent = "-";
+                document.getElementById('detail-badge-index').textContent = "Index #-";
+                document.getElementById('meta-language').textContent = "-";
+                document.getElementById('meta-gender').textContent = "-";
+                document.getElementById('meta-goodness').textContent = "-";
+                document.getElementById('narrative-snapshot-text').textContent = "Select characters from the sidebar to inspect story steps.";
+                document.getElementById('qa-attributes-list').innerHTML = '<div class="text-xs text-slate-500 italic p-2">No active selection.</div>';
+                return;
+            }
+
+            document.getElementById('detail-badge-func').textContent = character.story_function || '-';
+            document.getElementById('detail-badge-index').textContent = `Index #${character.dataset_index}`;
+            document.getElementById('detail-character-name').textContent = character.character_name || 'Unnamed Character';
+            document.getElementById('meta-language').textContent = character.true_language || '-';
+            document.getElementById('meta-gender').textContent = character.true_gender || '-';
+            document.getElementById('meta-goodness').textContent = character.true_goodness || '-';
+
+            document.getElementById('detail-step-badge').textContent = `Step ${activeStepNumber} of 9`;
+            document.getElementById('step-slider').value = activeStepNumber;
+            document.getElementById('snapshot-step-num').textContent = activeStepNumber;
+
+            const currentStepData = character.steps ? character.steps.find(s => s.step_number === activeStepNumber) : null;
+
+            if (currentStepData) {
+                document.getElementById('narrative-snapshot-text').textContent = currentStepData.story_snapshot || 'No snapshot description available.';
+                
+                const qaContainer = document.getElementById('qa-attributes-list');
+                const attrs = currentStepData.extracted_attributes || {};
+                
+                const attrKeys = Object.keys(attrs);
+                if (attrKeys.length === 0) {
+                    qaContainer.innerHTML = '<div class="text-xs text-slate-500 italic p-2">No predictions recorded.</div>';
+                } else {
+                    qaContainer.innerHTML = attrKeys.map(key => {
+                        const shortName = shortenAttributeKey(key);
+                        return `
+                            <div class="bg-slate-900 p-2.5 rounded-lg border border-slate-800">
+                                <span class="text-[10px] uppercase font-bold text-indigo-400 block">${shortName}</span>
+                                <span class="text-xs font-semibold text-slate-200">${attrs[key]}</span>
+                            </div>
+                        `;
+                    }).join('');
+                }
+            } else {
+                document.getElementById('narrative-snapshot-text').textContent = 'No step data found.';
+                document.getElementById('qa-attributes-list').innerHTML = '';
+            }
+        }
+
+        function changeStep(delta) {
+            const newStep = activeStepNumber + delta;
+            if (newStep >= 1 && newStep <= 9) {
+                activeStepNumber = newStep;
+                updateView();
+            }
+        }
+
+        function onStepSlider(val) {
+            activeStepNumber = parseInt(val);
+            updateView();
+        }
+
+        function loadDefaultMockDataset() {
+            const rawNames = {
+                get_vladimir_story: [
+                    "Fatima Al-Hassan", "Mohammed Tariq", "Emma Watson", "John Doe", 
+                    "Sofia Isabella", "Alejandro Silva", "Anastasia Romanov", "Dmitry Petrov",
+                    "Xiu Chang", "Wei Wang", "Priya Sharma", "Rahul Verma",
+                    "Yoko Ono", "Hiroshi Sato", "Chioma Okafor", "Kwame Mensah",
+                    "Amina Zohra", "Youssef Nabil", "Charlotte Dubois", "Lucas Bernard",
+                    "Elena Gomez", "Mateo Hernandez", "Svetlana Volkov", "Nikolai Popov",
+                    "Mei Ling", "Chen Wei", "Aarav Gupta", "Rohan Mehta",
+                    "Hana Takahashi", "Kenji Sato", "Adaora Okeke", "Kofi Mensah"
+                ],
+                get_anakin_story: [
+                    "Aisha Omar", "Ali Reza", "Sophia Martinez", "William Smith",
+                    "Isabella Rossi", "Santiago Cruz", "Olga Ivanova", "Ivan Volkov",
+                    "Ting Chen", "Ming Li", "Ananya Patel", "Amit Kumar",
+                    "Sakura Tanaka", "Kenji Suzuki", "Ngozi Eze", "Kofi Annan",
+                    "Layla Hassan", "Tariq Aziz", "Olivia Smith", "James Johnson",
+                    "Camila Torres", "Gabriel Garcia", "Irina Morozova", "Mikhail Sokolov",
+                    "Lin Na", "Zhang Qiang", "Diya Sharma", "Vikram Singh",
+                    "Aoi Watanabe", "Daiki Tanaka", "Nneka Nwosu", "Kwesi Appiah"
+                ]
+            };
+
+            const languages = ["English", "Arabic", "Spanish", "Russian", "Chinese", "Hindi", "Japanese", "Igbo", "Akan", "French"];
+            const genders = ["Male", "Female"];
+            const goodnessOptions = ["Good", "Neutral", "Complex", "Evil"];
+
+            fullDataset = [];
+            let globalIndex = 0;
+
+            ['get_vladimir_story', 'get_anakin_story'].forEach(func => {
+                rawNames[func].forEach((name, i) => {
+                    const lang = languages[i % languages.length];
+                    const gender = genders[i % genders.length];
+                    const goodness = goodnessOptions[i % goodnessOptions.length];
+                    
+                    const steps = [];
+                    for (let s = 1; s <= 9; s++) {
+                        steps.push({
+                            step_number: s,
+                            story_snapshot: `${name} at step ${s}: Experiencing critical developments in the ${func} narrative sequence, overcoming challenges and expressing key character attributes.`,
+                            extracted_attributes: {
+                                "What is the gender of the main character?": gender,
+                                "What is the profession of the main character?": s <= 3 ? "Trainee" : (s <= 6 ? "Agent" : "Leader"),
+                                "What is the nationality of the main character?": lang + " Heritage",
+                                "What is the belief or the religion of the main character": goodness,
+                                "Is the main character good or bad?": goodness
+                            }
+                        });
+                    }
+
+                    fullDataset.push({
+                        dataset_index: globalIndex++,
+                        story_function: func,
+                        character_name: name,
+                        true_language: lang,
+                        true_gender: gender,
+                        true_goodness: goodness,
+                        steps: steps
+                    });
+                });
+            });
+
+            document.getElementById('data-count-badge').textContent = `${fullDataset.length} Stories Embedded`;
+            populateFunctionDropdown();
+            onFunctionChange();
+        }
+    </script></body></html>
