@@ -7,7 +7,7 @@ Markus Ennsberger-Kranabiter, k01455904
 
 
             
-Reflection on my AI-usage:
+Reflection on my AI-usage:  
 (by markus)
 
 I was very satisfied with the custom-generated input data created by GEMINI. Nevertheless, I hadn't a clear plan in the beginning, what I want to visualize and how. 
