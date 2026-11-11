@@ -42,7 +42,7 @@ programming—or anything else.
 ## Reflection on my AI-usage:  
 (by md janib)
 
-For my part (political opinions) I used Claude to set up the experiment in Google Colab and to create the plots. I was very satisfied with how fast I got a working notebook. 
+For my part (political opinions) I used  to set up the experiment in Google Colab and to create the plots. I was very satisfied with how fast I got a working notebook. 
 Especially the attention visualization would have taken me much longer without AI.
 
 Nevertheless, the generated code did not work perfectly from the beginning. I had to run it myself, check the results and give feedback, so it took several prompts 
@@ -50,7 +50,7 @@ until everything worked. Some problems were only setup issues, like the Hugging 
 A more important problem was with K2-Horizon: the answers were first read wrong from the model output. I only noticed this because I looked at the raw answers of the model. 
 After fixing it, the results made much more sense. This showed me that I can't just trust the final plots.
 Like Markus, I also think it is a disadvantage when you don't fully understand "your" code. If something goes wrong, you depend on the AI again to fix it.
-(read more about my AI interactions in: ai-interactions/md_janib_rijbi_claude.md)
+(read more about my AI interactions in: ai-interactions/Political-Opinions/political_opinions.md)
 
 ### Overall insight: 
 
